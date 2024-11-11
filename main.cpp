@@ -27,7 +27,7 @@ public:
     void printRoutes() {
         for (int i = 0; i < routes.size(); i++) {
             Route &route = routes[i];  
-            cout << "Route from " << route.sourceCity << " to " << route.destinationCity << " | ";
+            cout << route.sourceCity << " -> " << route.destinationCity << " | ";
             cout << "Capacity: " << route.capacity;
             cout << ", Travel Time: " << route.travelTime;
             cout << ", Mode: " << route.mode << endl;
@@ -48,7 +48,7 @@ void print_map(){
     cout << "     |           |               | |                  PHI o\\    /" << endl;
     cout << "     |           |              _/ |____________________/-/    /" << endl;
     cout << "     |       __/ \\____      __/        |__/ \\__      _/|\\\\__ /" << endl;
-    cout << "     /   ___/         \\____/              ____/ \\DC o| || | //" << endl;
+    cout << "     /   ___/         \\____/              ____/\\WDC o| || | //" << endl;
     cout << "    /___/                |              _/        \\_ | ||__|" << endl;
     cout << "    |                    \\             /            \\|  \\__/" << endl;
 }
@@ -80,5 +80,6 @@ int main() {
     network.addRoute("Philadelphia", "Boston", 35, 6, "bus");
     network.addRoute("Philadelphia", "Washington DC", 80, 2, "train");
     network.printRoutes();
+
     return 0;
 }
