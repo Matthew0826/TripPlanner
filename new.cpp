@@ -185,6 +185,36 @@ void print_map(){
     cout << "||==========================================================================================||" << endl;
 }
 
+bool display_routes( string source, string destination ){
+    string cities[2] = {source, destination};
+    string firstLine = "";
+    string secondLine = "";
+    for(int i = 0; i < 2; i++ ){
+        if( cities[i].compare("wdc") == 0 || cities[i].compare("WDC") == 0 ){
+            firstLine += "\tWashington DC\t\t";
+            secondLine += "  \"The Nation's Capital\"\t";
+        }else if( cities[i].compare("phi") == 0 || cities[i].compare("PHI") == 0 ){
+            firstLine += "\tPhiladelphia\t\t";
+            secondLine += "  \"The City of Brotherly Love\"\t";
+        }else if( cities[i].compare("nyc") == 0 || cities[i].compare("NYC") == 0 ){
+            firstLine += "\tNew York City\t\t";
+            secondLine += "  \"The Big Apple\"\t";
+        }else if( cities[i].compare("bos") == 0 || cities[i].compare("BOS") == 0 ){
+            firstLine += "\tBoston\t\t";
+            secondLine += "\t\"Beantown\"\t";
+        }else if( cities[i].compare("chi") == 0 || cities[i].compare("CHI") == 0 ){
+            firstLine += "\tChicago\t\t";
+            secondLine += "  \"The Windy City\"\t";
+        }else{
+            return false;
+        }
+        if( i == 0 ){
+            firstLine += "-->";
+        }
+    }
+    cout << firstLine << "\n" << secondLine;    
+    return true;
+}
 
 string getCity( string input ){
     if( input.compare("Washington") == 0 || input.compare("DC") == 0 || input.compare("WDC") == 0 || input.compare("wdc") == 0 || input.compare("Washington DC") == 0){
@@ -193,12 +223,10 @@ string getCity( string input ){
         return "Philadelphia";
     }else if( input.compare("NYC") == 0 || input.compare("New York City") == 0 || input.compare("nyc") == 0 || input.compare("New York") == 0 ){
         return "NYC";
-    }else if( input.compare("Boston") == 0 || input.compare("BOS") == 0 || input.compare("bos") == 0 ){
-        return "Boston";
     }else if( input.compare("Chicago") == 0 || input.compare("CHI") == 0 || input.compare("chi") == 0 ){
         return "Chicago";
     }else{
-        return input;
+        return "";
     }
 }
 
