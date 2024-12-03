@@ -8,8 +8,11 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "${fileDirname}\\WindowsInterface.cpp",
+                "${fileDirname}\\CityNetwork.cpp",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-lws2_32"
             ],
             "options": {
                 "cwd": "${fileDirname}"
