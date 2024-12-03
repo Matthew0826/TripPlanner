@@ -71,6 +71,8 @@ int main() {
                 w.send_msg(msg);
             }
         }
+    }else{
+        std::cout << network.calculateMaxFlow("NYC", "LAX");
     }
 
 }

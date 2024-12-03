@@ -1,4 +1,5 @@
 #include "CityNetwork.h"
+#include <iostream>
 
 //This adds a city to the network
 void CityNetwork::addCity(std::string city){
@@ -51,20 +52,47 @@ int CityNetwork::calculateMaxFlow( std::string source, std::string destination){
     std::vector<std::vector<int>> residual = capacity; // Copy the capacity matrix as the residual graph
     int maxFlow = 0;
 
-    // Ford-Fulkerson algorithm
-    while (findAugmentingPath(sourceIdx, sinkIdx, parent)) {
-        int pathFlow = INT_MAX;
+    while (true) {
+        // BFS for finding an augmenting path
+        std::fill(parent.begin(), parent.end(), -1);
+        std::vector<bool> visited(cities.size(), false);
+        std::queue<int> q;
+        q.push(sourceIdx);
+        visited[sourceIdx] = true;
 
-        // Find the minimum residual capacity in the augmenting path
+        while (!q.empty()) {
+            int curr = q.front();
+            q.pop();
+
+            for (int next = 0; next < residual.size(); ++next) {
+                if (!visited[next] && residual[curr][next] > 0) {
+                    q.push(next);
+                    parent[next] = curr;
+                    visited[next] = true;
+                    if (next == sinkIdx) break;
+                }
+            }
+        }
+
+        // If no augmenting path, break
+        if (parent[sinkIdx] == -1) break;
+
+        // Find bottleneck capacity
+        int pathFlow = INT_MAX;
         for (int v = sinkIdx; v != sourceIdx; v = parent[v]) {
             int u = parent[v];
             pathFlow = std::min(pathFlow, residual[u][v]);
         }
 
-        // If path flow is zero, break the loop (safety check)
-        if (pathFlow == 0) { break;}
+        // Print the augmenting path with flow
+        std::cout << "Augmenting path with flow " << pathFlow << ": ";
+        for (int v = sinkIdx; v != -1; v = parent[v]) {
+            std::cout << cities.at(v);
+            if (v != sourceIdx) std::cout << " <- ";
+        }
+        std::cout << "\n";
 
-        // Update residual capacities
+        // Update residual graph
         for (int v = sinkIdx; v != sourceIdx; v = parent[v]) {
             int u = parent[v];
             residual[u][v] -= pathFlow;
