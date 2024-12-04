@@ -1,10 +1,17 @@
 #ifndef CITY_NETWORK
 #define CITY_NETWORK
 
+//These variables equalize the costs into more of a percentage of maximum
+#define TIME_SCALE 600
+#define CARBON_SCALE 0.5
+#define COST_SCALE 300
+
 #include <string>
 #include <vector>
 #include <map>
 #include <queue>
+#include <algorithm>
+#include <stdio.h>
 
 struct FlowResult{
     int flow;
@@ -36,6 +43,9 @@ class CityNetwork{
         // Calculate the max flow between two cities
         FlowResult calculateMaxFlow( std::string source, std::string destination );
 
+        //Calculate the best route between two cities
+        std::vector<Route> calculateOptimizedPath(std::string sourceCity, std::string destinationCity, int timeWeight, int costWeight, int impactWeight);
+
     private:
         std::vector<Route> routes;          // List that stores the routes
         std::vector<std::string> cities;
@@ -47,6 +57,7 @@ class CityNetwork{
         bool isInNetwork( std::string city );
         bool findAugmentingPath(int source, int sink, std::vector<int>& parent);
         int getIndex(std::string city);
-};
+
+};      
 
 #endif

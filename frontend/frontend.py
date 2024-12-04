@@ -20,9 +20,6 @@ city_list = []
 # Initialize Pygame
 pygame.init()
 
-#The status message
-status = "Backend Disconnected"
-
 # Set up the display
 screen = pygame.display.set_mode((1475, 700))  # Set screen size (width, height)
 pygame.display.set_caption("Trip Planner")
@@ -37,7 +34,6 @@ text = "Trip Planner"
 
 #Create the interface
 w = Interface(8001)
-status = "Backend Found!"
 # Create a surface with the text
 text_surface = font.render(text, True, (0, 0, 0))  # White color
 
@@ -51,10 +47,8 @@ cities = [["NYC", (40.713, -74.006)], ["CHI", (41.878, -87.6298)], ["PHI", (39.9
 def get_routes(source):
     city_list.clear()
     if source == "all":
-        status = "All Routes Displayed"
         w.send("Display All")
     else:
-        status = cities[source][0] + " Routes Displayed"
         w.send("Display " + cities[source][0])
     
     time.sleep(0.01)
@@ -77,9 +71,57 @@ def get_routes(source):
     city_list.extend(trains)
     city_list.extend(airplanes)
 
+def max_flow():
+    city_list.clear()
+    w.send("Flow " + cities[cities_clicked[len(cities_clicked)-1]][0] + " " + cities[cities_clicked[len(cities_clicked)-2]][0])
+    time.sleep(0.01)
+    message = str(w.recv())[2:-1].split(";")[:-1]
+    for route in message:
+        route = route.split(":")
+        capacity = int(route[0])
+        curr_cities = route[1].split(",")[:-1]
+        for i in range(len(curr_cities)-1):
+            #Check if route is already added
+            addCity = True
+            if len(city_list) != 0:
+                for cty in city_list:
+                    if (curr_cities[i] == cty[0] and curr_cities[i+1] == cty[1] ) or(curr_cities[i] == cty[1] and curr_cities[i+1] == cty[0] ):
+                        addCity = False 
+                        cty[2] += capacity
+            if addCity:
+                city_list.append([curr_cities[i], curr_cities[i+1], capacity])
+
+def get_optimized():
+    city_list.clear()
+    print("Route " + cities[cities_clicked[len(cities_clicked)-1]][0] + " " + cities[cities_clicked[len(cities_clicked)-2]][0] \
+           + " " + str(int(components[0].value)) + " " + str(int(components[1].value)) + " " + str(int(components[2].value)))
+    w.send("Route " + cities[cities_clicked[len(cities_clicked)-1]][0] + " " + cities[cities_clicked[len(cities_clicked)-2]][0] \
+           + " " + str(int(components[0].value)) + " " + str(int(components[1].value)) + " " + str(int(components[2].value)))
+
+    time.sleep(0.01)
+    message = str(w.recv())[2:].split(";")
+    busses = []
+    airplanes = []
+    trains = []
+    for route in message:
+        if( route == "b',," or route == "'" ):
+            continue
+        route = route.split(",")
+        if( route[2] == "Bus"):
+            busses.append((route[0], route[1], route[2]))
+        elif( route[2] == "Train"):
+            trains.append((route[0], route[1], route[2]))
+        elif( route[2] == "Airplane"):
+            airplanes.append((route[0], route[1], route[2]))
+
+    city_list.extend(busses)
+    city_list.extend(trains)
+    city_list.extend(airplanes)
+
+
 components = [Slider(screen, 1375, 380, 175, 50 ), Slider(screen, 1375, 480, 175, 50 ),Slider(screen, 1375, 580, 175, 50 ), 
-              Button(screen, 1375, 650, 175, 50, text="Get Best Route"), Button(screen, 1375, 85, 175, 50, text="Display All Routes", on_press=lambda: get_routes("all")),
-              Button(screen, 1375, 225, 175, 50, text="Display Source Routes", on_press=lambda: get_routes(cities_clicked[len(cities_clicked) - 1] if len(cities_clicked) != 0 else "None")), Button(screen, 1375, 290, 175, 50, text="Get Max Flow")]
+              Button(screen, 1375, 650, 175, 50, text="Get Best Route", on_press=get_optimized), Button(screen, 1375, 85, 175, 50, text="Display All Routes", on_press=lambda: get_routes("all")),
+              Button(screen, 1375, 225, 175, 50, text="Display Source Routes", on_press=lambda: get_routes(cities_clicked[len(cities_clicked) - 1] if len(cities_clicked) != 0 else "None")), Button(screen, 1375, 290, 175, 50, text="Get Max Flow", on_press=max_flow)]
 
 cities_clicked = []
 # Game loop
@@ -145,6 +187,10 @@ while running:
         elif( city[2] == "Train"):
             color = (0, 150, 0)
             width = 6
+        elif( type(city[2]) == int ):
+            width = int(city[2]/10)
+            color = (200, 200, 200)
+            
         pygame.draw.line(screen, color, getCityPos(city[0]), getCityPos(city[1]), width)
 
 
@@ -166,7 +212,6 @@ while running:
         city2 = "None"
         city1 = "None"
 
-    screen.blit(font.render(status, True, (0, 0, 0)),text_surface.get_rect(center=(1370, 150)) )
     screen.blit(font.render("Cities: " + city1 + " → " + city2, True, (0, 0, 0)),text_surface.get_rect(center=(1370, 190)) )
     screen.blit(font.render("Cost Weight (1-5): " + str(int(components[0].value)), True, (0, 0, 0)),text_surface.get_rect(center=(1390, 350)) )
     screen.blit(font.render("Time Weight (1-5): " + str(int(components[1].value)), True, (0, 0, 0)),text_surface.get_rect(center=(1390, 450)) )

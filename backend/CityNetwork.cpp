@@ -6,7 +6,7 @@
 //This adds a city to the network
 void CityNetwork::addCity(std::string city){
     // Check if the city is already in network
-    if( isInNetwork(city) ){ return; }
+    if( isInNetwork(city)){ return; }
 
     //Add the city to the network
     cities.push_back(city);
@@ -24,7 +24,7 @@ void CityNetwork::addRoute(Route route){
     
     //Add to capacity matrix
     capacity[getIndex(route.sourceCity)][getIndex(route.destinationCity)] += route.capacity;
-    
+    capacity[getIndex(route.destinationCity)][getIndex(route.sourceCity)] += route.capacity;
     //Push back the route
     routes.push_back(route);
 }
@@ -108,6 +108,57 @@ FlowResult CityNetwork::calculateMaxFlow( std::string source, std::string destin
     return result;
 }
 
+//This determines the optimal path to travel from point
+std::vector<Route> CityNetwork::calculateOptimizedPath(std::string source, std::string dest, int timeWeight, int costWeight, int impactWeight){
+    std::vector<double> weights(cities.size(), 1000000);
+    std::vector<Route> source_route(cities.size(), Route());
+    weights.at(getIndex(source)) = 0;
+    if( timeWeight == 0 && costWeight == 0 && impactWeight == 0 ){
+        timeWeight = 1; costWeight = 1; impactWeight = 1;
+    }
+
+    for( int j = 0; j < weights.size(); j++ ){
+        for( int i = 0; i < weights.size(); i++ ){
+            if( weights.at(i) <= 100000  ){
+                // This means we are going to process a node
+                for (Route curr_route : routes ){
+
+                    // Check if the node is relevant
+                    std::string otherNode;
+                    if( curr_route.sourceCity.compare( cities.at(i) ) == 0){otherNode = curr_route.destinationCity; }
+                    else if( curr_route.destinationCity.compare( cities.at(i) ) == 0){otherNode = curr_route.sourceCity; }
+                    else{ continue; }
+
+                    // Now generate the node's score
+                    double node_score = timeWeight*(curr_route.time/TIME_SCALE) + 
+                        costWeight*(curr_route.cost/COST_SCALE) + 
+                        impactWeight*(curr_route.environmentalImpact/CARBON_SCALE) + weights.at(i);
+                    
+                    // Check if the other Node's score is less than the current
+                    if( weights.at(getIndex(otherNode)) > node_score ){
+                        source_route.at(getIndex(otherNode)) = curr_route;
+                        weights.at(getIndex(otherNode)) = node_score;
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<Route> final_route;
+    std::string curr_node = dest;
+    do {
+        Route curr_route = source_route.at(getIndex(curr_node));
+        final_route.push_back(curr_route);
+        if( curr_route.sourceCity.compare(curr_node) == 0 ){
+            curr_node = curr_route.destinationCity;
+        }else{
+            curr_node = curr_route.sourceCity;
+        }
+    }while( curr_node.compare(source) != 0);
+
+    return final_route;
+}
+
 /*
 --------------PRIVATE METHODS---------------
  */
@@ -158,3 +209,9 @@ bool CityNetwork::findAugmentingPath(int source, int sink, std::vector<int>& par
 
     return false;
 }
+
+
+
+    
+
+    
