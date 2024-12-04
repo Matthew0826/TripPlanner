@@ -72,7 +72,11 @@ int main() {
             }
         }
     }else{
-        std::cout << network.calculateMaxFlow("NYC", "LAX");
+        FlowResult flow = network.calculateMaxFlow("NYC", "LAX");
+        for (int i = 0; i < flow.connections.size(); i++ ){
+            std::cout << flow.capacities[i] << ": " << flow.connections[i].at(0) << " -> " << flow.connections[i].at(1);
+        }
+        std::cout <<  "Max Flow: " << flow.flow << " people/day";
     }
 
 }

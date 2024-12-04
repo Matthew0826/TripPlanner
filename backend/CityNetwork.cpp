@@ -1,6 +1,8 @@
 #include "CityNetwork.h"
 #include <iostream>
 
+
+
 //This adds a city to the network
 void CityNetwork::addCity(std::string city){
     // Check if the city is already in network
@@ -11,7 +13,7 @@ void CityNetwork::addCity(std::string city){
 
     // Resize the capacity matrix
     for (auto& row : capacity) row.push_back(0);
-    capacity.push_back(std::vector<int>(cities.size(), 0));
+    capacity.push_back(std::vector<double>(cities.size(), 0));
 }
 
 //This adds a route to the network
@@ -41,16 +43,17 @@ std::vector<Route> CityNetwork::getCityRoutes(std::string city){
     return cityRoutes;
 }
 
-int CityNetwork::calculateMaxFlow( std::string source, std::string destination){
-    if(!isInNetwork(source) || !isInNetwork(destination)){ return -1; }
+FlowResult CityNetwork::calculateMaxFlow( std::string source, std::string destination){
+    if(!isInNetwork(source) || !isInNetwork(destination)){ return {}; }
 
     // Calculate the source and sink indices
     int sourceIdx = getIndex(source);
     int sinkIdx = getIndex(destination);
 
     std::vector<int> parent(cities.size(), -1);
-    std::vector<std::vector<int>> residual = capacity; // Copy the capacity matrix as the residual graph
+    std::vector<std::vector<double>> residual = capacity; // Copy the capacity matrix as the residual graph
     int maxFlow = 0;
+    FlowResult result;
 
     while (true) {
         // BFS for finding an augmenting path
@@ -78,19 +81,19 @@ int CityNetwork::calculateMaxFlow( std::string source, std::string destination){
         if (parent[sinkIdx] == -1) break;
 
         // Find bottleneck capacity
-        int pathFlow = INT_MAX;
+        double pathFlow = INT_MAX;
         for (int v = sinkIdx; v != sourceIdx; v = parent[v]) {
             int u = parent[v];
             pathFlow = std::min(pathFlow, residual[u][v]);
         }
 
         // Print the augmenting path with flow
-        std::cout << "Augmenting path with flow " << pathFlow << ": ";
+        result.capacities.push_back(pathFlow);
+        std::vector<std::string> output;
         for (int v = sinkIdx; v != -1; v = parent[v]) {
-            std::cout << cities.at(v);
-            if (v != sourceIdx) std::cout << " <- ";
+            output.push_back(cities.at(v));
         }
-        std::cout << "\n";
+        result.connections.push_back(output);
 
         // Update residual graph
         for (int v = sinkIdx; v != sourceIdx; v = parent[v]) {
@@ -101,7 +104,8 @@ int CityNetwork::calculateMaxFlow( std::string source, std::string destination){
 
         maxFlow += pathFlow;
     }
-    return maxFlow;
+    result.flow = maxFlow;
+    return result;
 }
 
 /*
