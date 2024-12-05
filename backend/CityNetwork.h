@@ -48,8 +48,8 @@ class CityNetwork{
         bool isInNetwork( std::string city );
 
     private:
-        std::vector<Route> routes;          // List that stores the routes
-        std::vector<std::string> cities;
+        std::vector<Route> routes;          // Vector that stores the routes
+        std::vector<std::string> cities;    // Vector that stores the cities
 
         std::vector<std::vector<double>> capacity; //Adjacency matrix for capacities
         std::vector<std::vector<double>> residual; // Residual graph
