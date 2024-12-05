@@ -40,6 +40,7 @@ std::string WindowsInterface::rcv_msg(){
     //Get the number of bytes
     int bytesReceived = recv(client, buffer, BUFFER_SIZE - 1, 0);
     
+    //Create the string and return it
     std::string s;
     for( int i = 0; i < bytesReceived; i++ ){
         s += buffer[i];

@@ -45,6 +45,7 @@ class CityNetwork{
 
         //Calculate the best route between two cities
         std::vector<Route> calculateOptimizedPath(std::string sourceCity, std::string destinationCity, int timeWeight, int costWeight, int impactWeight);
+        bool isInNetwork( std::string city );
 
     private:
         std::vector<Route> routes;          // List that stores the routes
@@ -54,7 +55,6 @@ class CityNetwork{
         std::vector<std::vector<double>> residual; // Residual graph
 
         // Check if a city is valid
-        bool isInNetwork( std::string city );
         bool findAugmentingPath(int source, int sink, std::vector<int>& parent);
         int getIndex(std::string city);
 
